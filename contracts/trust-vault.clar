@@ -94,3 +94,107 @@
     true
   )
 )
+
+;; Ensures proof data meets minimum security requirements
+(define-private (is-valid-proof-data (proof-data (buff 1024)))
+  (let ((proof-len (len proof-data)))
+    (and
+      (>= proof-len MINIMUM-PROOF-SIZE)
+      (not (is-eq proof-data 0x))
+    )
+  )
+)
+
+;; Validates credential expiration times
+(define-private (is-valid-expiration (expiration uint))
+  (> expiration (+ stacks-block-height MIN-EXPIRATION-BLOCKS))
+)
+
+;; Ensures metadata doesn't exceed storage limits
+(define-private (is-valid-metadata-length (metadata (string-utf8 256)))
+  (<= (len metadata) MAX-METADATA-LENGTH)
+)
+
+;; Validates cryptographic hash integrity
+(define-private (is-valid-hash (hash (buff 32)))
+  (not (is-eq hash 0x0000000000000000000000000000000000000000000000000000000000000000))
+)
+
+;; ADMINISTRATIVE FUNCTIONS
+
+;; Transfers administrative privileges to a new principal
+(define-public (set-admin (new-admin principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) ERR-NOT-AUTHORIZED)
+    (asserts! (not (is-eq new-admin tx-sender)) ERR-INVALID-INPUT)
+    (ok (var-set admin new-admin))
+  )
+)
+
+;; IDENTITY MANAGEMENT
+
+;; Registers a new self-sovereign identity with optional recovery mechanism
+(define-public (register-identity
+    (identity-hash (buff 32))
+    (recovery-addr (optional principal))
+  )
+  (let (
+      (sender tx-sender)
+      (existing-identity (map-get? identities sender))
+    )
+    (asserts! (is-none existing-identity) ERR-ALREADY-REGISTERED)
+    (asserts! (is-valid-hash identity-hash) ERR-INVALID-INPUT)
+    (asserts! (is-valid-recovery-address recovery-addr)
+      ERR-INVALID-RECOVERY-ADDRESS
+    )
+
+    (ok (map-set identities sender {
+      hash: identity-hash,
+      credentials: (list),
+      reputation-score: u100,
+      recovery-address: recovery-addr,
+      last-updated: stacks-block-height,
+      status: "ACTIVE",
+    }))
+  )
+)
+
+;; ZERO-KNOWLEDGE PROOF SYSTEM
+
+;; Submits a cryptographic proof for verification
+(define-public (submit-proof
+    (proof-hash (buff 32))
+    (proof-data (buff 1024))
+  )
+  (let (
+      (sender tx-sender)
+      (existing-identity (map-get? identities sender))
+      (existing-proof (map-get? zero-knowledge-proofs proof-hash))
+    )
+    (asserts! (is-some existing-identity) ERR-NOT-REGISTERED)
+    (asserts! (is-valid-hash proof-hash) ERR-INVALID-INPUT)
+    (asserts! (is-valid-proof-data proof-data) ERR-INVALID-PROOF-DATA)
+    (asserts! (is-none existing-proof) ERR-INVALID-PROOF)
+
+    (ok (map-set zero-knowledge-proofs proof-hash {
+      prover: sender,
+      verified: false,
+      timestamp: stacks-block-height,
+      proof-data: proof-data,
+    }))
+  )
+)
+
+;; Administratively verifies a submitted zero-knowledge proof
+(define-public (verify-proof (proof-hash (buff 32)))
+  (let (
+      (proof (map-get? zero-knowledge-proofs proof-hash))
+      (sender tx-sender)
+    )
+    (asserts! (is-some proof) ERR-INVALID-PROOF)
+    (asserts! (is-eq sender (var-get admin)) ERR-NOT-AUTHORIZED)
+    (ok (map-set zero-knowledge-proofs proof-hash
+      (merge (unwrap-panic proof) { verified: true })
+    ))
+  )
+)
