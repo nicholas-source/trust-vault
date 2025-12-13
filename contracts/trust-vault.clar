@@ -239,7 +239,7 @@
       subject: subject,
       claim-hash: claim-hash,
       expiration: expiration,
-      expiration-time: (+ stacks-block-time (to-uint (* (- expiration stacks-block-height) 600))),  ;; Clarity 4: Convert to Unix timestamp (~10min blocks)
+      expiration-time: (+ stacks-block-time (* (- expiration stacks-block-height) u600)),  ;; Clarity 4: Convert to Unix timestamp (~10min blocks)
       revoked: false,
       issued-at: stacks-block-time,  ;; Clarity 4: Track issuance timestamp
       metadata: metadata,
