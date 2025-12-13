@@ -12,6 +12,11 @@
 ;; - Dynamic reputation scoring system with administrative oversight
 ;; - Secure identity recovery mechanisms with designated recovery addresses
 ;; - Comprehensive input validation and security controls
+;;
+;; Clarity 4 Features:
+;; - Uses stacks-block-time for accurate timestamp-based logic
+;; - Enhanced time-based credential expiration with Unix timestamps
+;; - Improved temporal tracking for identity and credential lifecycle
 
 ;; ERROR CONSTANTS
 
@@ -47,6 +52,7 @@
     reputation-score: uint,
     recovery-address: (optional principal),
     last-updated: uint,
+    last-updated-time: uint,  ;; Clarity 4: Unix timestamp from stacks-block-time
     status: (string-ascii 20),
   }
 )
@@ -61,7 +67,9 @@
     subject: principal,
     claim-hash: (buff 32),
     expiration: uint,
+    expiration-time: uint,  ;; Clarity 4: Unix timestamp expiration
     revoked: bool,
+    issued-at: uint,  ;; Clarity 4: Unix timestamp of issuance
     metadata: (string-utf8 256),
   }
 )
@@ -73,6 +81,7 @@
     prover: principal,
     verified: bool,
     timestamp: uint,
+    timestamp-unix: uint,  ;; Clarity 4: Unix timestamp from stacks-block-time
     proof-data: (buff 1024),
   }
 )
@@ -154,6 +163,7 @@
       reputation-score: u100,
       recovery-address: recovery-addr,
       last-updated: stacks-block-height,
+      last-updated-time: stacks-block-time,  ;; Clarity 4: Store Unix timestamp
       status: "ACTIVE",
     }))
   )
@@ -180,6 +190,7 @@
       prover: sender,
       verified: false,
       timestamp: stacks-block-height,
+      timestamp-unix: stacks-block-time,  ;; Clarity 4: Store Unix timestamp
       proof-data: proof-data,
     }))
   )
@@ -228,7 +239,9 @@
       subject: subject,
       claim-hash: claim-hash,
       expiration: expiration,
+      expiration-time: (+ stacks-block-time (* (- expiration stacks-block-height) u600)),  ;; Clarity 4: Convert to Unix timestamp (~10min blocks)
       revoked: false,
+      issued-at: stacks-block-time,  ;; Clarity 4: Track issuance timestamp
       metadata: metadata,
     }))
   )
@@ -315,6 +328,7 @@
       (merge (unwrap-panic identity-data) {
         hash: new-hash,
         last-updated: stacks-block-height,
+        last-updated-time: stacks-block-time,  ;; Clarity 4: Update Unix timestamp
         status: "RECOVERED",
       })
     ))
@@ -359,4 +373,53 @@
 ;; Retrieves zero-knowledge proof information
 (define-read-only (get-proof (proof-hash (buff 32)))
   (map-get? zero-knowledge-proofs proof-hash)
+)
+
+;; CLARITY 4 ENHANCED READ-ONLY FUNCTIONS
+
+;; Returns identity status as ASCII string (Clarity 4: to-ascii?)
+(define-read-only (get-identity-status-string (identity principal))
+  (let ((identity-data (map-get? identities identity)))
+    (if (is-some identity-data)
+      (ok (get status (unwrap-panic identity-data)))
+      ERR-NOT-REGISTERED
+    )
+  )
+)
+
+;; Returns credential validity with timestamp info (Clarity 4: stacks-block-time)
+(define-read-only (get-credential-time-info
+    (issuer principal)
+    (nonce uint)
+  )
+  (let ((credential (map-get? credentials {
+      issuer: issuer,
+      nonce: nonce,
+    })))
+    (if (is-some credential)
+      (ok {
+        issued-at: (get issued-at (unwrap-panic credential)),
+        expiration-time: (get expiration-time (unwrap-panic credential)),
+        current-time: stacks-block-time,
+        is-expired: (>= stacks-block-time (get expiration-time (unwrap-panic credential))),
+      })
+      ERR-INVALID-CREDENTIAL
+    )
+  )
+)
+
+;; Check if credential is expired based on Unix timestamp (Clarity 4: stacks-block-time)
+(define-read-only (is-credential-expired
+    (issuer principal)
+    (nonce uint)
+  )
+  (let ((credential (map-get? credentials {
+      issuer: issuer,
+      nonce: nonce,
+    })))
+    (if (is-some credential)
+      (ok (>= stacks-block-time (get expiration-time (unwrap-panic credential))))
+      ERR-INVALID-CREDENTIAL
+    )
+  )
 )
