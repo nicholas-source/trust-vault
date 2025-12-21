@@ -217,6 +217,7 @@
       (existing-identity (map-get? identities sender))
       (existing-proof (map-get? zero-knowledge-proofs proof-hash))
     )
+    (asserts! (not (is-paused)) ERR-CONTRACT-PAUSED)
     (asserts! (is-some existing-identity) ERR-NOT-REGISTERED)
     (asserts! (is-valid-hash proof-hash) ERR-INVALID-INPUT)
     (asserts! (is-valid-proof-data proof-data) ERR-INVALID-PROOF-DATA)
@@ -265,6 +266,7 @@
       (issuer-identity (map-get? identities sender))
       (subject-identity (map-get? identities subject))
     )
+    (asserts! (not (is-paused)) ERR-CONTRACT-PAUSED)
     (asserts! (is-some issuer-identity) ERR-NOT-REGISTERED)
     (asserts! (is-some subject-identity) ERR-NOT-REGISTERED)
     (asserts! (is-valid-hash claim-hash) ERR-INVALID-INPUT)
@@ -296,6 +298,7 @@
       })
       (credential (map-get? credentials credential-id))
     )
+    (asserts! (not (is-paused)) ERR-CONTRACT-PAUSED)
     (asserts! (is-some credential) ERR-INVALID-CREDENTIAL)
     (asserts! (is-eq sender issuer) ERR-NOT-AUTHORIZED)
     (ok (map-set credentials credential-id
@@ -350,6 +353,7 @@
       (sender tx-sender)
       (identity-data (map-get? identities identity))
     )
+    (asserts! (not (is-paused)) ERR-CONTRACT-PAUSED)
     (asserts! (is-some identity-data) ERR-NOT-REGISTERED)
     (asserts! (is-some (get recovery-address (unwrap-panic identity-data)))
       ERR-NOT-AUTHORIZED
