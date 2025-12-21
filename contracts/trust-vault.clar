@@ -139,6 +139,33 @@
 
 ;; ADMINISTRATIVE FUNCTIONS
 
+;; Emergency pause mechanism - can be triggered by admin or guardian
+(define-public (pause-contract)
+  (let ((sender tx-sender))
+    (asserts! (or 
+      (is-eq sender (var-get admin))
+      (is-eq (some sender) (var-get pause-guardian))
+    ) ERR-NOT-AUTHORIZED)
+    (ok (var-set contract-paused true))
+  )
+)
+
+;; Unpause contract - only admin can unpause
+(define-public (unpause-contract)
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) ERR-NOT-AUTHORIZED)
+    (ok (var-set contract-paused false))
+  )
+)
+
+;; Set pause guardian - separate from admin for security
+(define-public (set-pause-guardian (new-guardian (optional principal)))
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) ERR-NOT-AUTHORIZED)
+    (ok (var-set pause-guardian new-guardian))
+  )
+)
+
 ;; Transfers administrative privileges to a new principal
 (define-public (set-admin (new-admin principal))
   (begin
@@ -159,6 +186,7 @@
       (sender tx-sender)
       (existing-identity (map-get? identities sender))
     )
+    (asserts! (not (is-paused)) ERR-CONTRACT-PAUSED)
     (asserts! (is-none existing-identity) ERR-ALREADY-REGISTERED)
     (asserts! (is-valid-hash identity-hash) ERR-INVALID-INPUT)
     (asserts! (is-valid-recovery-address recovery-addr)
