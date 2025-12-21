@@ -1,10 +1,53 @@
 # TrustVault
 
-[![Clarity](https://img.shields.io/badge/Clarity-v3-blue.svg)](https://clarity-lang.org/)
+[![Clarity](https://img.shields.io/badge/Clarity-v4-blue.svg)](https://clarity-lang.org/)
 [![Stacks](https://img.shields.io/badge/Stacks-Blockchain-orange.svg)](https://stacks.org/)
 [![License](https://img.shields.io/badge/License-ISC-green.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/Tests-41%20Passing-brightgreen.svg)](./tests)
+[![Coverage](https://img.shields.io/badge/Coverage-Enhanced-blue.svg)](./tests)
 
 A comprehensive blockchain-based self-sovereign identity management system built on the Stacks blockchain, enabling users to maintain full control over their digital identity while providing robust mechanisms for credential issuance, verification, and reputation tracking through zero-knowledge proofs and cryptographic attestations.
+
+## ⚠️ Mainnet Readiness Status
+
+**Current Status**: 🟢 **DEPLOYED TO MAINNET** (Beta)
+
+**Contract Address**: [`SPR54P37AA27XHMMTCDEW4YZFPFJX69162JR5CT4.trust-vault`](https://explorer.hiro.so/txid/SPR54P37AA27XHMMTCDEW4YZFPFJX69162JR5CT4.trust-vault?chain=mainnet)  
+**Deployed**: December 21, 2025  
+**Network**: Stacks Mainnet
+
+### Deployment Checklist
+
+- ✅ Contract deployed to mainnet
+- ✅ Emergency pause mechanism active
+- ✅ Comprehensive test coverage (41 tests)
+- ✅ Chainhook integration ready
+- ✅ Documentation complete
+- ⚠️ External security audit (recommended)
+- ⚠️ Admin transfer to multisig (recommended)
+- ⚠️ Pause guardian setup (recommended)
+
+**⚠️ Important**: While deployed, consider this BETA until security audit is completed and admin is transferred to multisig governance.
+
+See [CONTRACT_INFO.md](CONTRACT_INFO.md) for detailed deployment information.
+
+---
+
+## 🚀 Quick Links
+
+- **[Get Started Now →](QUICKSTART.md)** - 5-minute setup guide
+- **[Contract Info](CONTRACT_INFO.md)** - Full API reference & examples
+- **[Security Audit](SECURITY_AUDIT.md)** - Security checklist & recommendations
+- **[Deployment Guide](DEPLOYMENT.md)** - Complete deployment procedures
+- **[Chainhook Setup](docs/CHAINHOOK_INTEGRATION.md)** - Real-time event monitoring
+
+### Contract Access
+
+- **Explorer**: [View on Stacks Explorer](https://explorer.hiro.so/txid/SPR54P37AA27XHMMTCDEW4YZFPFJX69162JR5CT4.trust-vault?chain=mainnet)
+- **API**: `https://api.mainnet.hiro.so/v2/contracts/interface/SPR54P37AA27XHMMTCDEW4YZFPFJX69162JR5CT4/trust-vault`
+- **Full Address**: `SPR54P37AA27XHMMTCDEW4YZFPFJX69162JR5CT4.trust-vault`
+
+---
 
 ## 🚀 Features
 
@@ -13,6 +56,7 @@ A comprehensive blockchain-based self-sovereign identity management system built
 - **Self-Sovereign Identity Registration**: Cryptographic hash-based identity anchoring
 - **Secure Identity Recovery**: Designated recovery address mechanisms
 - **Identity Status Tracking**: Active, recovered, and other status states
+- **Emergency Pause Mechanism**: 🆕 Contract-level circuit breaker for security incidents
 
 ### Verifiable Credentials
 
@@ -39,6 +83,37 @@ A comprehensive blockchain-based self-sovereign identity management system built
 - **Administrative Controls**: Secure admin privilege management
 - **Error Handling**: Detailed error codes and validation
 - **Recovery Mechanisms**: Secure identity recovery processes
+- **Emergency Pause System**: 🆕 Admin and guardian can pause contract operations
+- **Pause Guardian**: 🆕 Separate pause authority for faster emergency response
+
+## 🔗 Real-Time Event Monitoring
+
+### Chainhook Integration
+
+TrustVault now supports real-time blockchain event monitoring via Chainhooks:
+
+- Monitor identity registrations, credential issuance/revocation
+- Track reputation changes and ZK proof submissions
+- Receive instant notifications for contract pause events
+- Build off-chain indices for faster queries
+
+See [docs/CHAINHOOK_INTEGRATION.md](docs/CHAINHOOK_INTEGRATION.md) for setup guide.
+
+**Example**:
+
+```typescript
+import { TrustVaultChainhooks } from './src/chainhooks';
+
+const monitor = new TrustVaultChainhooks({
+  baseUrl: 'https://api.mainnet.hiro.so',
+  apiKey: process.env.CHAINHOOKS_API_KEY,
+  network: 'mainnet',
+  contractAddress: 'SP.../trust-vault',
+  webhookUrl: 'https://your-server.com/webhooks',
+});
+
+await monitor.registerAllMonitors();
+```
 
 ## 📋 Prerequisites
 
@@ -238,6 +313,9 @@ MINIMUM-PROOF-SIZE: u64            ; Minimum proof data size
 
 ## 📈 Roadmap
 
+- [x] Emergency pause mechanism
+- [x] Comprehensive test suite (41 tests)
+- [x] Chainhook integration for real-time monitoring
 - [ ] Enhanced zero-knowledge proof verification algorithms
 - [ ] Multi-signature recovery mechanisms
 - [ ] Credential delegation and proxy mechanisms
@@ -245,8 +323,17 @@ MINIMUM-PROOF-SIZE: u64            ; Minimum proof data size
 - [ ] Advanced reputation scoring algorithms
 - [ ] Cross-chain identity verification
 - [ ] Privacy-preserving credential sharing
+- [ ] External security audit
+- [ ] Mainnet deployment
 
-## 🤝 Contributing
+## 📚 Documentation
+
+- **[Security Audit Checklist](SECURITY_AUDIT.md)**: Pre-mainnet security review
+- **[Deployment Guide](DEPLOYMENT.md)**: Step-by-step mainnet deployment
+- **[Chainhook Integration](docs/CHAINHOOK_INTEGRATION.md)**: Real-time event monitoring setup
+- **[API Reference](contracts/trust-vault.clar)**: Contract functions and data structures
+
+## 🔐 Security Considerations
 
 We welcome contributions to TrustVault! Please follow these steps:
 
