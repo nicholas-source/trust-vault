@@ -32,6 +32,7 @@
 (define-constant ERR-INVALID-EXPIRATION (err u1009))
 (define-constant ERR-INVALID-RECOVERY-ADDRESS (err u1010))
 (define-constant ERR-INVALID-PROOF-DATA (err u1011))
+(define-constant ERR-CONTRACT-PAUSED (err u1012))
 
 ;; SYSTEM CONSTANTS
 
@@ -90,8 +91,15 @@
 
 (define-data-var admin principal tx-sender)
 (define-data-var credential-nonce uint u0)
+(define-data-var contract-paused bool false)
+(define-data-var pause-guardian (optional principal) none)
 
 ;; VALIDATION FUNCTIONS
+
+;; Checks if contract is currently paused
+(define-private (is-paused)
+  (var-get contract-paused)
+)
 
 ;; Validates recovery address to prevent security vulnerabilities
 (define-private (is-valid-recovery-address (recovery-addr (optional principal)))
@@ -131,6 +139,33 @@
 
 ;; ADMINISTRATIVE FUNCTIONS
 
+;; Emergency pause mechanism - can be triggered by admin or guardian
+(define-public (pause-contract)
+  (let ((sender tx-sender))
+    (asserts! (or 
+      (is-eq sender (var-get admin))
+      (is-eq (some sender) (var-get pause-guardian))
+    ) ERR-NOT-AUTHORIZED)
+    (ok (var-set contract-paused true))
+  )
+)
+
+;; Unpause contract - only admin can unpause
+(define-public (unpause-contract)
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) ERR-NOT-AUTHORIZED)
+    (ok (var-set contract-paused false))
+  )
+)
+
+;; Set pause guardian - separate from admin for security
+(define-public (set-pause-guardian (new-guardian (optional principal)))
+  (begin
+    (asserts! (is-eq tx-sender (var-get admin)) ERR-NOT-AUTHORIZED)
+    (ok (var-set pause-guardian new-guardian))
+  )
+)
+
 ;; Transfers administrative privileges to a new principal
 (define-public (set-admin (new-admin principal))
   (begin
@@ -151,6 +186,7 @@
       (sender tx-sender)
       (existing-identity (map-get? identities sender))
     )
+    (asserts! (not (is-paused)) ERR-CONTRACT-PAUSED)
     (asserts! (is-none existing-identity) ERR-ALREADY-REGISTERED)
     (asserts! (is-valid-hash identity-hash) ERR-INVALID-INPUT)
     (asserts! (is-valid-recovery-address recovery-addr)
@@ -181,6 +217,7 @@
       (existing-identity (map-get? identities sender))
       (existing-proof (map-get? zero-knowledge-proofs proof-hash))
     )
+    (asserts! (not (is-paused)) ERR-CONTRACT-PAUSED)
     (asserts! (is-some existing-identity) ERR-NOT-REGISTERED)
     (asserts! (is-valid-hash proof-hash) ERR-INVALID-INPUT)
     (asserts! (is-valid-proof-data proof-data) ERR-INVALID-PROOF-DATA)
@@ -229,6 +266,7 @@
       (issuer-identity (map-get? identities sender))
       (subject-identity (map-get? identities subject))
     )
+    (asserts! (not (is-paused)) ERR-CONTRACT-PAUSED)
     (asserts! (is-some issuer-identity) ERR-NOT-REGISTERED)
     (asserts! (is-some subject-identity) ERR-NOT-REGISTERED)
     (asserts! (is-valid-hash claim-hash) ERR-INVALID-INPUT)
@@ -260,6 +298,7 @@
       })
       (credential (map-get? credentials credential-id))
     )
+    (asserts! (not (is-paused)) ERR-CONTRACT-PAUSED)
     (asserts! (is-some credential) ERR-INVALID-CREDENTIAL)
     (asserts! (is-eq sender issuer) ERR-NOT-AUTHORIZED)
     (ok (map-set credentials credential-id
@@ -314,6 +353,7 @@
       (sender tx-sender)
       (identity-data (map-get? identities identity))
     )
+    (asserts! (not (is-paused)) ERR-CONTRACT-PAUSED)
     (asserts! (is-some identity-data) ERR-NOT-REGISTERED)
     (asserts! (is-some (get recovery-address (unwrap-panic identity-data)))
       ERR-NOT-AUTHORIZED

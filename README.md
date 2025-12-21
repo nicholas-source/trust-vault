@@ -1,10 +1,53 @@
 # TrustVault
 
-[![Clarity](https://img.shields.io/badge/Clarity-v3-blue.svg)](https://clarity-lang.org/)
+[![Clarity](https://img.shields.io/badge/Clarity-v4-blue.svg)](https://clarity-lang.org/)
 [![Stacks](https://img.shields.io/badge/Stacks-Blockchain-orange.svg)](https://stacks.org/)
 [![License](https://img.shields.io/badge/License-ISC-green.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/Tests-41%20Passing-brightgreen.svg)](./tests)
+[![Coverage](https://img.shields.io/badge/Coverage-Enhanced-blue.svg)](./tests)
 
 A comprehensive blockchain-based self-sovereign identity management system built on the Stacks blockchain, enabling users to maintain full control over their digital identity while providing robust mechanisms for credential issuance, verification, and reputation tracking through zero-knowledge proofs and cryptographic attestations.
+
+## ⚠️ Mainnet Readiness Status
+
+**Current Status**: 🟢 **DEPLOYED TO MAINNET** (Beta)
+
+**Contract Address**: [`SPR54P37AA27XHMMTCDEW4YZFPFJX69162JR5CT4.trust-vault`](https://explorer.hiro.so/txid/SPR54P37AA27XHMMTCDEW4YZFPFJX69162JR5CT4.trust-vault?chain=mainnet)  
+**Deployed**: December 21, 2025  
+**Network**: Stacks Mainnet
+
+### Deployment Checklist
+
+- ✅ Contract deployed to mainnet
+- ✅ Emergency pause mechanism active
+- ✅ Comprehensive test coverage (41 tests)
+- ✅ Chainhook integration complete (6 monitors active)
+- ✅ Real-time event monitoring live
+- ✅ Documentation complete
+- ⚠️ External security audit (recommended)
+- ⚠️ Admin transfer to multisig (recommended)
+- ⚠️ Pause guardian setup (recommended)
+
+**⚠️ Important**: While deployed, consider this BETA until security audit is completed and admin is transferred to multisig governance.
+
+See [CONTRACT_INFO.md](CONTRACT_INFO.md) for detailed deployment information.
+
+---
+
+## 🚀 Quick Links
+
+- **[Get Started Now →](QUICKSTART.md)** - 5-minute setup guide
+- **[Contract Info](CONTRACT_INFO.md)** - Full API reference & examples
+- **[Security Audit](SECURITY_AUDIT.md)** - Security checklist & recommendations
+- **[Chainhook Status](CHAINHOOK_STATUS.md)** - Real-time monitoring setup & status
+
+### Contract Access
+
+- **Explorer**: [View on Stacks Explorer](https://explorer.hiro.so/txid/SPR54P37AA27XHMMTCDEW4YZFPFJX69162JR5CT4.trust-vault?chain=mainnet)
+- **API**: `https://api.mainnet.hiro.so/v2/contracts/interface/SPR54P37AA27XHMMTCDEW4YZFPFJX69162JR5CT4/trust-vault`
+- **Full Address**: `SPR54P37AA27XHMMTCDEW4YZFPFJX69162JR5CT4.trust-vault`
+
+---
 
 ## 🚀 Features
 
@@ -13,6 +56,7 @@ A comprehensive blockchain-based self-sovereign identity management system built
 - **Self-Sovereign Identity Registration**: Cryptographic hash-based identity anchoring
 - **Secure Identity Recovery**: Designated recovery address mechanisms
 - **Identity Status Tracking**: Active, recovered, and other status states
+- **Emergency Pause Mechanism**: 🆕 Contract-level circuit breaker for security incidents
 
 ### Verifiable Credentials
 
@@ -39,6 +83,66 @@ A comprehensive blockchain-based self-sovereign identity management system built
 - **Administrative Controls**: Secure admin privilege management
 - **Error Handling**: Detailed error codes and validation
 - **Recovery Mechanisms**: Secure identity recovery processes
+- **Emergency Pause System**: 🆕 Admin and guardian can pause contract operations
+- **Pause Guardian**: 🆕 Separate pause authority for faster emergency response
+
+## 🔗 Real-Time Event Monitoring
+
+### Chainhook Integration ✅ LIVE
+
+TrustVault is now actively monitored with **6 chainhooks** on mainnet:
+
+✅ **Identity Registrations** - Real-time identity creation alerts  
+✅ **Credential Issuance** - Track new credentials as they're issued  
+✅ **Credential Revocations** - Monitor credential revocation events  
+✅ **Reputation Updates** - Real-time reputation score changes  
+✅ **ZK Proof Submissions** - Zero-knowledge proof event tracking  
+✅ **Emergency Pause Events** - Instant security incident notifications
+
+**Quick Setup**:
+
+```bash
+# Install dependencies
+npm install
+
+# Configure environment
+cp .env.example .env
+# Add your CHAINHOOKS_API_KEY and WEBHOOK_URL
+
+# Register all monitors
+npm run setup:chainhooks
+```
+
+**Example Usage**:
+
+```typescript
+import { TrustVaultChainhooks } from './src/chainhooks';
+
+const monitor = new TrustVaultChainhooks({
+  baseUrl: 'https://api.mainnet.hiro.so',
+  apiKey: process.env.CHAINHOOKS_API_KEY,
+  network: 'mainnet',
+  contractAddress: 'SPR54P37AA27XHMMTCDEW4YZFPFJX69162JR5CT4.trust-vault',
+  webhookUrl: process.env.WEBHOOK_URL,
+});
+
+// Register all monitors at once
+await monitor.registerAllMonitors();
+
+// Or register individual monitors
+await monitor.monitorIdentityRegistrations();
+await monitor.monitorCredentialIssuance();
+```
+
+**Management Commands**:
+
+```bash
+npm run setup:chainhooks      # Register all chainhooks
+npm run cleanup:chainhooks    # Interactive cleanup tool
+npx tsx scripts/test-api.ts   # Test API connection
+```
+
+See [CHAINHOOK_STATUS.md](CHAINHOOK_STATUS.md) for complete setup guide and current status.
 
 ## 📋 Prerequisites
 
@@ -65,6 +169,23 @@ A comprehensive blockchain-based self-sovereign identity management system built
 
    ```bash
    clarinet --version
+   ```
+
+4. **Configure Chainhook monitoring** (optional)
+
+   ```bash
+   # Copy environment template
+   cp .env.example .env
+   
+   # Edit .env and add:
+   # CHAINHOOKS_API_KEY=your-hiro-api-key
+   # WEBHOOK_URL=your-webhook-endpoint
+   
+   # Test API connection
+   npx tsx scripts/test-api.ts
+   
+   # Register chainhooks
+   npm run setup:chainhooks
    ```
 
 ## 🚦 Getting Started
@@ -238,6 +359,20 @@ MINIMUM-PROOF-SIZE: u64            ; Minimum proof data size
 
 ## 📈 Roadmap
 
+### ✅ Completed
+- [x] Emergency pause mechanism with guardian support
+- [x] Comprehensive test suite (41 tests, all passing)
+- [x] Chainhook integration with 6 active monitors
+- [x] Mainnet deployment (December 21, 2025)
+- [x] Real-time event monitoring system
+- [x] Complete API documentation
+
+### 🚧 In Progress
+- [ ] External security audit
+- [ ] Admin transfer to multisig governance
+- [ ] Pause guardian configuration
+
+### 📅 Planned
 - [ ] Enhanced zero-knowledge proof verification algorithms
 - [ ] Multi-signature recovery mechanisms
 - [ ] Credential delegation and proxy mechanisms
@@ -245,8 +380,17 @@ MINIMUM-PROOF-SIZE: u64            ; Minimum proof data size
 - [ ] Advanced reputation scoring algorithms
 - [ ] Cross-chain identity verification
 - [ ] Privacy-preserving credential sharing
+- [ ] Mobile SDK for identity management
 
-## 🤝 Contributing
+## 📚 Documentation
+
+- **[Quick Start Guide](QUICKSTART.md)**: Get started in 5 minutes
+- **[Contract Info](CONTRACT_INFO.md)**: Complete API reference with mainnet address
+- **[Security Audit](SECURITY_AUDIT.md)**: Comprehensive security checklist (200+ points)
+- **[Chainhook Status](CHAINHOOK_STATUS.md)**: Real-time monitoring setup & current status
+- **[Source Code](contracts/trust-vault.clar)**: Full contract implementation
+
+## 🔐 Security Considerations
 
 We welcome contributions to TrustVault! Please follow these steps:
 
@@ -267,10 +411,22 @@ We welcome contributions to TrustVault! Please follow these steps:
 
 This project is licensed under the ISC License - see the [LICENSE](LICENSE) file for details.
 
-## Support
+## 📞 Support & Resources
 
-- **Documentation**: [Stacks Documentation](https://docs.stacks.co/)
-- **Clarity Language**: [Clarity Documentation](https://clarity-lang.org/)
+### Mainnet Contract
+- **Address**: `SPR54P37AA27XHMMTCDEW4YZFPFJX69162JR5CT4.trust-vault`
+- **Explorer**: [View on Stacks Explorer](https://explorer.hiro.so/txid/SPR54P37AA27XHMMTCDEW4YZFPFJX69162JR5CT4.trust-vault?chain=mainnet)
+- **API Endpoint**: `https://api.mainnet.hiro.so/v2/contracts/interface/SPR54P37AA27XHMMTCDEW4YZFPFJX69162JR5CT4/trust-vault`
+
+### Documentation
+- **Stacks**: [docs.stacks.co](https://docs.stacks.co/)
+- **Clarity**: [clarity-lang.org](https://clarity-lang.org/)
+- **Chainhooks**: [docs.hiro.so/chainhooks](https://docs.hiro.so/chainhooks)
+
+### Tools
+- **Test API**: `npx tsx scripts/test-api.ts`
+- **Manage Chainhooks**: `npm run cleanup:chainhooks`
+- **Run Tests**: `npm test`
 
 ## 🙏 Acknowledgments
 
