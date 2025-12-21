@@ -1,4 +1,9 @@
-import { TrustVaultChainhooks, CHAINHOOKS_BASE_URL } from './chainhooks';
+import { TrustVaultChainhooks } from '../src/chainhooks';
+import { CHAINHOOK_CONFIG } from '../src/config';
+import * as dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 /**
  * Example: Setting up TrustVault chainhook monitoring
@@ -11,13 +16,15 @@ import { TrustVaultChainhooks, CHAINHOOKS_BASE_URL } from './chainhooks';
  */
 
 async function setupTrustVaultMonitoring() {
+  const config = CHAINHOOK_CONFIG.mainnet;
+  
   // Initialize chainhook client with your configuration
   const chainhooks = new TrustVaultChainhooks({
-    baseUrl: CHAINHOOKS_BASE_URL.mainnet, // Use mainnet for production
-    apiKey: process.env.CHAINHOOKS_API_KEY || 'your-api-key-here',
-    network: 'mainnet',
-    contractAddress: 'SPR54P37AA27XHMMTCDEW4YZFPFJX69162JR5CT4.trust-vault',
-    webhookUrl: 'https://your-server.com/webhooks',
+    baseUrl: config.baseUrl,
+    apiKey: process.env.CHAINHOOKS_API_KEY || '',
+    network: config.network,
+    contractAddress: config.contractAddress,
+    webhookUrl: process.env.WEBHOOK_URL || '',
   });
 
   // Check API status first
@@ -304,9 +311,24 @@ async function generateAnalytics(): Promise<TrustVaultAnalytics> {
 // Export for use in other modules
 export { setupTrustVaultMonitoring, manageMonitors, generateAnalytics };
 
-// Run if executed directly
-if (require.main === module) {
+// Run if executed directly (ES module compatible check)
+if (import.meta.url === `file://${process.argv[1]}`) {
   setupTrustVaultMonitoring()
-    .then(() => console.log('\n✅ TrustVault monitoring setup complete!'))
-    .catch(console.error);
+    .then(() => {
+      console.log('\n✅ TrustVault monitoring setup complete!');
+      console.log('\n📊 Monitor your chainhooks at:');
+      console.log('   https://platform.hiro.so/');
+      console.log('\n🔔 Webhook endpoints receiving events:');
+      console.log(`   POST ${process.env.WEBHOOK_URL}/identity-registered`);
+      console.log(`   POST ${process.env.WEBHOOK_URL}/credential-issued`);
+      console.log(`   POST ${process.env.WEBHOOK_URL}/credential-revoked`);
+      console.log(`   POST ${process.env.WEBHOOK_URL}/reputation-updated`);
+      console.log(`   POST ${process.env.WEBHOOK_URL}/proof-submitted`);
+      console.log(`   POST ${process.env.WEBHOOK_URL}/contract-paused`);
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error('\n❌ Setup failed:', error.message);
+      process.exit(1);
+    });
 }
