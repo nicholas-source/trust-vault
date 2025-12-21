@@ -32,6 +32,7 @@
 (define-constant ERR-INVALID-EXPIRATION (err u1009))
 (define-constant ERR-INVALID-RECOVERY-ADDRESS (err u1010))
 (define-constant ERR-INVALID-PROOF-DATA (err u1011))
+(define-constant ERR-CONTRACT-PAUSED (err u1012))
 
 ;; SYSTEM CONSTANTS
 
@@ -90,8 +91,15 @@
 
 (define-data-var admin principal tx-sender)
 (define-data-var credential-nonce uint u0)
+(define-data-var contract-paused bool false)
+(define-data-var pause-guardian (optional principal) none)
 
 ;; VALIDATION FUNCTIONS
+
+;; Checks if contract is currently paused
+(define-private (is-paused)
+  (var-get contract-paused)
+)
 
 ;; Validates recovery address to prevent security vulnerabilities
 (define-private (is-valid-recovery-address (recovery-addr (optional principal)))
