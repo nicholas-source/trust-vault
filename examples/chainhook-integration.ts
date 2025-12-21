@@ -13,10 +13,10 @@ import { TrustVaultChainhooks, CHAINHOOKS_BASE_URL } from './chainhooks';
 async function setupTrustVaultMonitoring() {
   // Initialize chainhook client with your configuration
   const chainhooks = new TrustVaultChainhooks({
-    baseUrl: CHAINHOOKS_BASE_URL.testnet, // or CHAINHOOKS_BASE_URL.mainnet
+    baseUrl: CHAINHOOKS_BASE_URL.mainnet, // Use mainnet for production
     apiKey: process.env.CHAINHOOKS_API_KEY || 'your-api-key-here',
-    network: 'testnet', // or 'mainnet'
-    contractAddress: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.trust-vault',
+    network: 'mainnet',
+    contractAddress: 'SPR54P37AA27XHMMTCDEW4YZFPFJX69162JR5CT4.trust-vault',
     webhookUrl: 'https://your-server.com/webhooks',
   });
 
