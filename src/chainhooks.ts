@@ -38,19 +38,22 @@ export class TrustVaultChainhooks {
       name: 'TrustVault Identity Registrations',
       chain: 'stacks',
       network: this.config.network,
-      version: 1,
+      version: '1',
       filters: {
-        predicate: {
-          scope: 'contract_call',
-          contract_identifier: this.config.contractAddress,
-          method: 'register-identity',
-        },
+        events: [
+          {
+            type: 'contract_call',
+            contract_identifier: this.config.contractAddress,
+            method: 'register-identity',
+          },
+        ],
       },
-      then_that: {
-        http_post: {
-          url: `${this.config.webhookUrl}/identity-registered`,
-          authorization_header: `Bearer ${this.config.apiKey}`,
-        },
+      action: {
+        type: 'http_post',
+        url: `${this.config.webhookUrl}/identity-registered`,
+      },
+      options: {
+        enable_on_registration: true,
       },
     };
 
@@ -73,19 +76,22 @@ export class TrustVaultChainhooks {
       name: 'TrustVault Credential Issuance',
       chain: 'stacks',
       network: this.config.network,
-      version: 1,
+      version: '1',
       filters: {
-        predicate: {
-          scope: 'contract_call',
-          contract_identifier: this.config.contractAddress,
-          method: 'issue-credential',
-        },
+        events: [
+          {
+            type: 'contract_call',
+            contract_identifier: this.config.contractAddress,
+            method: 'issue-credential',
+          },
+        ],
       },
-      then_that: {
-        http_post: {
-          url: `${this.config.webhookUrl}/credential-issued`,
-          authorization_header: `Bearer ${this.config.apiKey}`,
-        },
+      action: {
+        type: 'http_post',
+        url: `${this.config.webhookUrl}/credential-issued`,
+      },
+      options: {
+        enable_on_registration: true,
       },
     };
 
@@ -108,19 +114,22 @@ export class TrustVaultChainhooks {
       name: 'TrustVault Credential Revocations',
       chain: 'stacks',
       network: this.config.network,
-      version: 1,
+      version: '1',
       filters: {
-        predicate: {
-          scope: 'contract_call',
-          contract_identifier: this.config.contractAddress,
-          method: 'revoke-credential',
-        },
+        events: [
+          {
+            type: 'contract_call',
+            contract_identifier: this.config.contractAddress,
+            method: 'revoke-credential',
+          },
+        ],
       },
-      then_that: {
-        http_post: {
-          url: `${this.config.webhookUrl}/credential-revoked`,
-          authorization_header: `Bearer ${this.config.apiKey}`,
-        },
+      action: {
+        type: 'http_post',
+        url: `${this.config.webhookUrl}/credential-revoked`,
+      },
+      options: {
+        enable_on_registration: true,
       },
     };
 
@@ -142,19 +151,23 @@ export class TrustVaultChainhooks {
     const chainhook: ChainhookDefinition = {
       name: 'TrustVault Reputation Updates',
       chain: 'stacks',
-      network: 1,
+      network: this.config.network,
+      version: '1',
       filters: {
-        predicate: {
-          scope: 'contract_call',
-          contract_identifier: this.config.contractAddress,
-          method: 'update-reputation',
-        },
+        events: [
+          {
+            type: 'contract_call',
+            contract_identifier: this.config.contractAddress,
+            method: 'update-reputation',
+          },
+        ],
       },
-      then_that: {
-        http_post: {
-          url: `${this.config.webhookUrl}/reputation-updated`,
-          authorization_header: `Bearer ${this.config.apiKey}`,
-        },
+      action: {
+        type: 'http_post',
+        url: `${this.config.webhookUrl}/reputation-updated`,
+      },
+      options: {
+        enable_on_registration: true,
       },
     };
 
@@ -177,19 +190,22 @@ export class TrustVaultChainhooks {
       name: 'TrustVault ZK Proof Submissions',
       chain: 'stacks',
       network: this.config.network,
-      version: 1,
+      version: '1',
       filters: {
-        predicate: {
-          scope: 'contract_call',
-          contract_identifier: this.config.contractAddress,
-          method: 'submit-proof',
-        },
+        events: [
+          {
+            type: 'contract_call',
+            contract_identifier: this.config.contractAddress,
+            method: 'submit-proof',
+          },
+        ],
       },
-      then_that: {
-        http_post: {
-          url: `${this.config.webhookUrl}/proof-submitted`,
-          authorization_header: `Bearer ${this.config.apiKey}`,
-        },
+      action: {
+        type: 'http_post',
+        url: `${this.config.webhookUrl}/proof-submitted`,
+      },
+      options: {
+        enable_on_registration: true,
       },
     };
 
@@ -212,19 +228,22 @@ export class TrustVaultChainhooks {
       name: 'TrustVault Emergency Pause Events',
       chain: 'stacks',
       network: this.config.network,
-      version: 1,
+      version: '1',
       filters: {
-        predicate: {
-          scope: 'contract_call',
-          contract_identifier: this.config.contractAddress,
-          method: 'pause-contract',
-        },
+        events: [
+          {
+            type: 'contract_call',
+            contract_identifier: this.config.contractAddress,
+            method: 'pause-contract',
+          },
+        ],
       },
-      then_that: {
-        http_post: {
-          url: `${this.config.webhookUrl}/contract-paused`,
-          authorization_header: `Bearer ${this.config.apiKey}`,
-        },
+      action: {
+        type: 'http_post',
+        url: `${this.config.webhookUrl}/contract-paused`,
+      },
+      options: {
+        enable_on_registration: true,
       },
     };
 
